@@ -4,6 +4,7 @@ import { Search, MapPin } from "lucide-react";
 
 type Props = {
   search: string;
+  displaySearch?: string;
   city: string;
   aiMode: boolean;
   onSearchChange: (v: string) => void;
@@ -16,6 +17,7 @@ type Props = {
 
 export default function HeroSearch({
   search,
+  displaySearch,
   city,
   aiMode,
   onSearchChange,
@@ -53,7 +55,7 @@ export default function HeroSearch({
           <div className="flex flex-1 items-center gap-2 px-3 py-2">
             <Search className="h-4 w-4 shrink-0 text-ink/40" />
             <input
-              value={search}
+              value={displaySearch ?? search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search brand, model, or type — e.g. Corolla, SUV"
               className="w-full bg-transparent font-body text-sm text-ink placeholder:text-ink/40 focus:outline-none"

@@ -29,6 +29,7 @@ export default function Home() {
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiMode, setAiMode] = useState(false);
   const [aiSearching, setAiSearching] = useState(false);
+  const [aiSearchPrompt, setAiSearchPrompt] = useState<string | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const lastAiRequestRef = useRef({ search: "", city: "" });
 
@@ -76,6 +77,7 @@ export default function Home() {
         const nextSearch = parsed.search ?? query;
         const nextCity = parsed.city ?? cityValue;
 
+        setAiSearchPrompt(nextSearch);
         setSearch(nextSearch);
         setCity(nextCity);
         setFilters((prev) => ({
@@ -92,6 +94,7 @@ export default function Home() {
           priceMax: parsed.priceMax ?? prev.priceMax,
         }));
       } catch (err) {
+        setAiSearchPrompt(null);
         if (axios.isAxiosError(err) && err.response?.data?.error) {
           setAiError(String(err.response.data.error));
         } else {
@@ -136,10 +139,17 @@ export default function Home() {
 
       <HeroSearch
         search={search}
+        displaySearch={aiSearching && aiSearchPrompt ? aiSearchPrompt : undefined}
         city={city}
         aiMode={aiMode}
-        onSearchChange={setSearch}
-        onCityChange={setCity}
+        onSearchChange={(value) => {
+          setAiSearchPrompt(null);
+          setSearch(value);
+        }}
+        onCityChange={(value) => {
+          setAiSearchPrompt(null);
+          setCity(value);
+        }}
         onSubmit={() => setFilters((prev) => ({ ...prev, page: 1 }))}
         onAiModeToggle={() => setAiMode((prev) => !prev)}
         aiSearching={aiSearching}
