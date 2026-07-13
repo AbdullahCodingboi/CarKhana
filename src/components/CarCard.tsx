@@ -104,7 +104,7 @@ export default function CarCard({ car }) {
               ${car.rentalPricePerDay}
               <span className="font-body text-xs font-normal text-ink/40"> /day</span>
             </p>
-            <p className="font-body text-[11px] text-ink/40">Posted by @{car.owner?.username}</p>
+            <p className="font-body text-[11px] text-ink/40">Posted by {car.owner?.name || "Owner"}</p>
           </div>
         </div>
 

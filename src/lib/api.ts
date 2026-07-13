@@ -9,7 +9,7 @@ export type CarImage = {
 
 export type CarOwner = {
   _id: string;
-  username: string;
+  name: string;
   email?: string;
   phone?: string;
   whatsapp?: string;
@@ -122,7 +122,7 @@ export async function fetchCars(filters: CarFilters): Promise<CarsResponse> {
 /** Builds a wa.me deep link with a prefilled message, using the listing's own contact number. */
 export function whatsappLink(car: Car): string {
   const digits = car.whatsappContact.replace(/[^\d]/g, "");
-  const message = `Hi ${car.owner?.username || ""}, I saw your ${car.year} ${car.brand} ${car.model} on CarKhana Rent A Car and I'm interested.`;
+  const message = `Hi ${car.owner?.name || ""}, I saw your ${car.year} ${car.brand} ${car.model} on CarKhana Rent A Car and I'm interested.`;
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
 export async function signupUser(payload) {

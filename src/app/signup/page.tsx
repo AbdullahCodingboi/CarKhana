@@ -11,10 +11,10 @@ import {
   Zap,
   ArrowRight,
 } from "lucide-react";
-import { signupUser, loginUser } from "../../lib/api";
+import { signupUser } from "../../lib/api";
 
 const initialForm = {
-  username: "",
+  name: "",
   email: "",
   password: "",
   confirmPassword: "",
@@ -64,8 +64,8 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
 
-    if (!form.username || !form.email || !form.password) {
-      setError("Username, email, and password are required.");
+    if (!form.name || !form.email || !form.password) {
+      setError("Name, email, and password are required.");
       return;
     }
     if (form.password.length < 6) {
@@ -80,19 +80,9 @@ export default function SignupPage() {
     setSubmitting(true);
     try {
       const { confirmPassword, ...payload } = form;
-      const signupResponse = await signupUser(payload);
-
-      if (signupResponse?.token && signupResponse?.user) {
-        localStorage.setItem("zrac_token", signupResponse.token);
-        localStorage.setItem("zrac_user", JSON.stringify(signupResponse.user));
-        router.push("/dashboard");
-        return;
-      }
-
-      const loginResponse = await loginUser({ email: payload.email, password: payload.password });
-      localStorage.setItem("zrac_token", loginResponse.token);
-      localStorage.setItem("zrac_user", JSON.stringify(loginResponse.user));
-      router.push("/dashboard");
+      await signupUser(payload);
+      setSuccess(true);
+      return;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
@@ -164,11 +154,10 @@ export default function SignupPage() {
                   <CheckCircle2 className="h-6 w-6 text-brand-600" />
                 </span>
                 <h2 className="mt-4 font-display text-xl font-bold text-slate-950">
-                  You're in, {form.username}
+                  You're almost there, {form.name}
                 </h2>
                 <p className="mt-2 font-body text-sm leading-relaxed text-slate-600">
-                  Your account has been created. Log in to start listing your car or browsing
-                  others.
+                  We sent a verification link to <span className="font-semibold">{form.email}</span>. Click it to activate your account before logging in.
                 </p>
                 <Link
                   href="/"
@@ -186,11 +175,11 @@ export default function SignupPage() {
                 </p>
 
                 <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-                  <Field label="Username" required>
+                  <Field label="Full name" required>
                     <input
-                      value={form.username}
-                      onChange={update("username")}
-                      placeholder="e.g. CarKhana_k"
+                      value={form.name}
+                      onChange={update("name")}
+                      placeholder="e.g. Joe Khan"
                       className={inputClass}
                     />
                   </Field>

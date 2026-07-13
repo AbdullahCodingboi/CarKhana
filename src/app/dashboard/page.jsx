@@ -106,7 +106,7 @@ export default function DashboardPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="font-display text-2xl font-bold text-ink">
-              {user ? `${user.username}'s listings` : "Your listings"}
+              {user ? `${user.name}'s listings` : "Your listings"}
             </h1>
             <p className="mt-1 font-body text-sm text-muted">
               {loading ? "Loading…" : `${cars.length} car${cars.length === 1 ? "" : "s"} posted`}

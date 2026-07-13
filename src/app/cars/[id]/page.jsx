@@ -285,11 +285,11 @@ export default function CarDetailPage() {
             <div className="sticky top-6 rounded-2xl border border-line bg-white p-5 shadow-card">
               <div className="flex items-center gap-3">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-base font-bold text-white">
-                  {car.owner?.username?.[0]?.toUpperCase() || "?"}
+                  {car.owner?.name?.[0]?.toUpperCase() || "?"}
                 </span>
                 <div className="min-w-0">
                   <p className="truncate font-display text-sm font-bold text-ink">
-                    {car.owner?.username || "Owner"}
+                    {car.owner?.name || "Owner"}
                   </p>
                   {car.owner?.city && (
                     <p className="flex items-center gap-1 font-body text-xs text-muted">

@@ -8,7 +8,7 @@ import ListCarForm from "@/components/ListCarForm";
 export default function ListYourCarPage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<{ username: string } | null>(null);
+  const [user, setUser] = useState<{ name?: string } | null>(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("zrac_token");
