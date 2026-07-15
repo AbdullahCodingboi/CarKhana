@@ -7,7 +7,7 @@ import { CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import { API_BASE } from "@/lib/api";
 
 export default function VerifyEmailTokenPage() {
-  const params = useParams();
+  const params = useParams<{ token: string }>();
   const token = params?.token;
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
