@@ -170,10 +170,10 @@ export default function CarDetailPage() {
             {error || "Please try again in a moment."}
           </p>
           <Link
-            href="/"
+            href="/login"
             className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-ink px-5 py-2.5 font-body text-sm font-semibold text-white transition hover:bg-brand-700"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to browsing
+            <ArrowLeft className="h-4 w-4" /> Back To Login
           </Link>
         </div>
       </main>
@@ -186,10 +186,10 @@ export default function CarDetailPage() {
     <main className="min-h-screen bg-surface px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <Link
-          href="/"
+          href="/login"
           className="inline-flex items-center gap-1.5 font-body text-sm font-medium text-muted transition hover:text-brand-700"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to browsing
+          <ArrowLeft className="h-4 w-4" /> Back To Login
         </Link>
 
         <div className="mt-5 grid grid-cols-1 gap-8 lg:grid-cols-3">

@@ -101,7 +101,7 @@ export default function CarCard({ car }) {
         <div className="mt-4 flex items-end justify-between gap-3">
           <div>
             <p className="font-mono text-lg font-semibold text-ink">
-              ${car.rentalPricePerDay}
+              PKR{car.rentalPricePerDay}
               <span className="font-body text-xs font-normal text-ink/40"> /day</span>
             </p>
             <p className="font-body text-[11px] text-ink/40">Posted by {car.owner?.name || "Owner"}</p>

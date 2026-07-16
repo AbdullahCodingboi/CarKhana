@@ -233,3 +233,27 @@ export async function deleteCar(carId: string, token: string) {
 
   return data;
 }
+
+/** Update car by id. Accepts partial car fields. */
+export async function updateCar(carId: string, payload: Partial<Car> | FormData, token?: string) {
+  const headers: HeadersInit = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}/api/cars/${carId}`, {
+    method: "PATCH",
+    headers: payload instanceof FormData ? headers : { ...headers, "Content-Type": "application/json" },
+    body: payload instanceof FormData ? payload : JSON.stringify(payload),
+  });
+
+  const data = await getJsonResponse(res);
+  if (!res.ok) {
+    throw createApiError(res, data);
+  }
+
+  return data;
+}
+
+/** Convenience helper to mark a car as unlisted/unavailable. */
+export async function unlistCar(carId: string, token?: string) {
+  return updateCar(carId, { availabilityStatus: "unavailable" }, token);
+}
