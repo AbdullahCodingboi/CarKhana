@@ -7,6 +7,7 @@ import { Plus, MapPin, LogOut, Car as CarIcon, X, Pencil } from "lucide-react";
 import Header from "../../components/Header";
 import ListCarForm from "../../components/ListCarForm";
 import { clearAuth, deleteCar, fetchMyCars, isAuthError, unlistCar } from "../../lib/api";
+import { Clock } from "lucide-react";
 
 const STATUS_STYLES = {
   available: "bg-emerald-50 text-emerald-700",
@@ -91,14 +92,14 @@ export default function DashboardPage() {
     }
   };
 
-  const handleUnlistCar = async (carId) => {
+  const handleUnlistCar = async (carId, targetStatus = "unavailable") => {
     if (!token) return;
 
     setUnlistingIds((current) => [...current, carId]);
     setError(null);
 
     try {
-      const res = await unlistCar(carId, token);
+      const res = await unlistCar(carId, token, targetStatus);
       setCars((current) =>
         current.map((car) => (car._id === carId ? res.car : car))
       );
@@ -108,7 +109,7 @@ export default function DashboardPage() {
         router.replace("/login");
         return;
       }
-      setError(err instanceof Error ? err.message : "Failed to unlist the car.");
+      setError(err instanceof Error ? err.message : "Failed to update the car status.");
     } finally {
       setUnlistingIds((current) => current.filter((id) => id !== carId));
     }
@@ -280,9 +281,16 @@ export default function DashboardPage() {
 
           <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
             <div>
-              <p className="truncate font-display text-lg font-bold text-ink">
-                {car.brand} {car.model}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="truncate font-display text-lg font-bold text-ink">
+                  {car.brand} {car.model}
+                </p>
+                {car.isVerified === false && (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 font-body text-xs font-semibold text-amber-700">
+                    <Clock className="h-3 w-3" /> Pending
+                  </span>
+                )}
+              </div>
               <p className="mt-1 flex items-center gap-1 font-body text-sm text-muted">
                 <MapPin className="h-3.5 w-3.5" /> {car.city} · {car.year}
               </p>
@@ -321,7 +329,7 @@ export default function DashboardPage() {
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                handleUnlistCar(car._id);
+                handleUnlistCar(car._id, "unavailable");
               }}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-3 py-2 font-body text-sm font-semibold text-ink/70 transition hover:bg-surface disabled:cursor-wait disabled:opacity-60 sm:flex-none"
             >

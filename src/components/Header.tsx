@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, LogOut } from "lucide-react";
+import { Plus, LogOut, Shield } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { clearAuth } from "../lib/api";
@@ -9,11 +9,23 @@ import { clearAuth } from "../lib/api";
 export default function Header() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const setLoginState = () => {
-      const storedUser = typeof window !== "undefined" ? window.localStorage.getItem("zrac_user") : null;
+      if (typeof window === "undefined") return;
+      const storedUser = window.localStorage.getItem("zrac_user");
       setIsLoggedIn(Boolean(storedUser));
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser);
+          setIsAdmin(Boolean(parsed?.isAdmin));
+        } catch {
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
     };
 
     setLoginState();
@@ -24,6 +36,7 @@ export default function Header() {
   const handleLogout = () => {
     clearAuth();
     setIsLoggedIn(false);
+    setIsAdmin(false);
     router.push("/login");
   };
 
@@ -42,6 +55,15 @@ export default function Header() {
         <nav className="hidden items-center gap-4 font-body text-sm font-medium text-ink/70 md:flex">
           {isLoggedIn ? (
             <>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 font-semibold text-violet-700 transition hover:bg-violet-100"
+                >
+                  <Shield className="h-3.5 w-3.5" />
+                  Admin
+                </Link>
+              )}
               <Link href="/dashboard" className="transition hover:text-brand-700">
                 Dashboard
               </Link>

@@ -1,6 +1,6 @@
 // Matches cms-backend: GET /api/cars, models Car / User / Image
 
-export const API_BASE ="https://zeeshan-rent-a-car.vercel.app";
+export const API_BASE = "https://zeeshan-rent-a-car.vercel.app";
 
 export type CarImage = {
   imageUrl: string;
@@ -40,6 +40,7 @@ export type Car = {
   images: CarImage[];
   datePosted?: string;
   createdAt?: string;
+  isVerified?: boolean;
 };
 
 export type CarsResponse = {
@@ -67,6 +68,18 @@ export type CarFilters = {
   sort?: "newest" | "oldest" | "lowestPrice" | "highestPrice" | "mileage" | "year";
   page?: number;
   limit?: number;
+};
+
+export type AdminUser = {
+  _id: string;
+  id?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  city?: string;
+  isAdmin: boolean;
+  isVerified: boolean;
+  createdAt: string;
 };
 
 function getJsonResponse(response: Response) {
@@ -125,7 +138,8 @@ export function whatsappLink(car: Car): string {
   const message = `Hi ${car.owner?.name || ""}, I saw your ${car.year} ${car.brand} ${car.model} on CarKhana Rent A Car and I'm interested.`;
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
-export async function signupUser(payload) {
+
+export async function signupUser(payload: any) {
   const res = await fetch(`${API_BASE}/api/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -140,7 +154,7 @@ export async function signupUser(payload) {
   return data;
 }
 
-export async function loginUser(payload) {
+export async function loginUser(payload: any) {
   const res = await fetch(`${API_BASE}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -165,6 +179,7 @@ export async function fetchCarById(id: string) {
 
   return data;
 }
+
 export type CreateCarPayload = {
   brand: string;
   model: string;
@@ -234,13 +249,13 @@ export async function deleteCar(carId: string, token: string) {
   return data;
 }
 
-/** Update car by id. Accepts partial car fields. */
+/** Update car by id. Accepts partial car fields. Uses PUT per backend spec. */
 export async function updateCar(carId: string, payload: Partial<Car> | FormData, token?: string) {
   const headers: HeadersInit = {};
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}/api/cars/${carId}`, {
-    method: "PATCH",
+    method: "PUT",
     headers: payload instanceof FormData ? headers : { ...headers, "Content-Type": "application/json" },
     body: payload instanceof FormData ? payload : JSON.stringify(payload),
   });
@@ -253,7 +268,108 @@ export async function updateCar(carId: string, payload: Partial<Car> | FormData,
   return data;
 }
 
-/** Convenience helper to mark a car as unlisted/unavailable. */
-export async function unlistCar(carId: string, token?: string) {
-  return updateCar(carId, { availabilityStatus: "unavailable" }, token);
+/** Toggle a car's availability. Pass "unavailable" to unlist, "available" to relist. */
+export async function unlistCar(carId: string, token: string, targetStatus: "available" | "unavailable" = "unavailable") {
+  return updateCar(carId, { availabilityStatus: targetStatus }, token);
+}
+
+// ─── Admin API ───────────────────────────────────────────────────────────────
+
+/** GET /api/admin/cars — all cars regardless of verification. */
+export async function fetchAdminCars(
+  token: string,
+  params: { verified?: boolean; page?: number; limit?: number } = {}
+) {
+  const qs = new URLSearchParams();
+  if (params.verified !== undefined) qs.set("verified", String(params.verified));
+  if (params.page) qs.set("page", String(params.page));
+  if (params.limit) qs.set("limit", String(params.limit));
+
+  const res = await fetch(`${API_BASE}/api/admin/cars?${qs.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  const data = await getJsonResponse(res);
+  if (!res.ok) throw createApiError(res, data);
+  return data;
+}
+
+/** GET /api/admin/cars/pending — unverified cars pending approval. */
+export async function fetchPendingCars(token: string) {
+  const res = await fetch(`${API_BASE}/api/admin/cars/pending`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  const data = await getJsonResponse(res);
+  if (!res.ok) throw createApiError(res, data);
+  return data;
+}
+
+/** PATCH /api/admin/cars/:id/approve */
+export async function approveCar(carId: string, token: string) {
+  const res = await fetch(`${API_BASE}/api/admin/cars/${carId}/approve`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await getJsonResponse(res);
+  if (!res.ok) throw createApiError(res, data);
+  return data;
+}
+
+/** PATCH /api/admin/cars/:id/reject */
+export async function rejectCar(carId: string, token: string) {
+  const res = await fetch(`${API_BASE}/api/admin/cars/${carId}/reject`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await getJsonResponse(res);
+  if (!res.ok) throw createApiError(res, data);
+  return data;
+}
+
+/** DELETE /api/admin/cars/:id — hard-delete from admin panel. */
+export async function adminDeleteCar(carId: string, token: string) {
+  const res = await fetch(`${API_BASE}/api/admin/cars/${carId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await getJsonResponse(res);
+  if (!res.ok) throw createApiError(res, data);
+  return data;
+}
+
+/** GET /api/admin/users */
+export async function fetchAdminUsers(
+  token: string,
+  params: { page?: number; limit?: number } = {}
+) {
+  const qs = new URLSearchParams();
+  if (params.page) qs.set("page", String(params.page));
+  if (params.limit) qs.set("limit", String(params.limit));
+
+  const res = await fetch(`${API_BASE}/api/admin/users?${qs.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  const data = await getJsonResponse(res);
+  if (!res.ok) throw createApiError(res, data);
+  return data;
+}
+
+/** DELETE /api/admin/users/:id */
+export async function adminDeleteUser(userId: string, token: string) {
+  const res = await fetch(`${API_BASE}/api/admin/users/${userId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await getJsonResponse(res);
+  if (!res.ok) throw createApiError(res, data);
+  return data;
 }
